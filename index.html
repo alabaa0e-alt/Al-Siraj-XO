@@ -1,4 +1,7 @@
-'''<!DOCTYPE html>
+
+# Create a single HTML file with everything embedded (CSS in <style>, JS in <script>)
+
+html_complete = '''<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -505,9 +508,17 @@
 <script>
 '''
 
+with open('/mnt/agents/output/al-siraj-xo.html', 'w', encoding='utf-8') as f:
+    f.write(html_complete)
+
+print("Part 1 (HTML + CSS) written successfully")
+print(f"Size so far: {len(html_complete)} bytes")
 
 
-    r'''var maps = [
+
+    
+# Now append the JavaScript part
+js_part = r'''var maps = [
     { id: 'office', name: 'الإدارة', desc: 'بيئة رسمية بأجواء الخشب الطبيعي', class: 'bg-office' },
     { id: 'studio', name: 'الاستديو', desc: 'بيئة فنية مع إضاءات احترافية', class: 'bg-studio' },
     { id: 'theater', name: 'غرفة المسرح', desc: 'أجواء مسرحية درامية', class: 'bg-theater' },
@@ -838,4 +849,14 @@ document.getElementById('rules-modal').addEventListener('click', function(e) {
 });
 
 init();
-''' 
+'''
+
+# Append JS and close HTML
+with open('/mnt/agents/output/al-siraj-xo.html', 'a', encoding='utf-8') as f:
+    f.write(js_part)
+    f.write('\n</script>\n</body>\n</html>')
+
+import os
+size = os.path.getsize('/mnt/agents/output/al-siraj-xo.html')
+print(f"✅ Single HTML file created successfully!")
+print(f"Total size: {size} bytes ({size/1024:.1f} KB)")
