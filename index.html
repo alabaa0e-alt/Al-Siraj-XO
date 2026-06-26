@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>السراج اكس او</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+        
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --gold: #f1c40f;
+            --glass: rgba(255,255,255,0.15);
+            --glass-border: rgba(255,255,255,0.25);
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        
+        .screen { display: none; min-height: 100vh; width: 100%; position: relative; }
+        .screen.active { display: flex; flex-direction: column; }
+        
+        #intro-screen {
+            justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .intro-content { text-align: center; animation: fadeInUp 1s ease; }
+        .intro-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, #f1c40f, #e67e22, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .intro-subtitle {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 2rem;
+        }
+        .btn-start {
+            padding: 1rem 3rem;
+            font-size: 1.3rem;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(231,76,60,0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-start:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(231,76,60,0.6); }
+        
+        #map-screen {
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+        .screen-header {
+            text-align: center; margin-bottom: 2rem;
+        }
+        .screen-title {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+        .screen-desc { color: rgba(255,255,255,0.6); font-size: 1rem; }
+        
+        .maps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        .map-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .map-card:hover { transform: translateY(-8px); box-shadow: var(--shadow); border-color: var(--gold); }
+        .map-card.selected { border-color: var(--gold); box-shadow: 0 0 30px rgba(241,196,15,0.3); }
+        .map-preview { height: 120px; border-radius: 12px; margin-bottom: 1rem; position: relative; overflow: hidden; }
+        .map-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .map-desc { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+        
+        .preview-office { background: linear-gradient(135deg, #d4a574, #c19a6b, #a0826d); }
+        .preview-studio { background: linear-gradient(135deg, #2c2c54, #40407a, #706fd3); }
+        .preview-theater { background: linear-gradient(135deg, #5c0000, #8b0000, #a52a2a); }
+        .preview-field { background: linear-gradient(135deg, #2d5a27, #4a8b3c, #6ab04c); }
+        .preview-gym { background: linear-gradient(135deg, #1e3a5f, #2c5282, #3182ce); }
+        
+        .btn-continue {
+            margin: 2rem auto 0;
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(45deg, var(--gold), #e67e22);
+            color: #1a1a2e;
+            cursor: pointer;
+            display: block;
+            transition: all 0.3s ease;
+        }
+        .btn-continue:disabled { opacity: 0.4; cursor: not-allowed; }
+        
+        #char-screen {
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        }
+        .char-step { text-align: center; margin-bottom: 1rem; }
+        .char-step-title {
+            font-size: 1.5rem; font-weight: 700;
+            color: var(--gold);
+        }
+        .char-step-sub { color: rgba(255,255,255,0.5); font-size: 0.9rem; }
+        
+        .chars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 1rem;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        .char-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .char-card:hover { border-color: rgba(255,255,255,0.3); transform: scale(1.05); }
+        .char-card.selected { border-color: var(--gold); background: rgba(241,196,15,0.1); }
+        .char-card.disabled { opacity: 0.3; pointer-events: none; }
+        .char-avatar { width: 80px; height: 80px; margin: 0 auto 0.5rem; }
+        .char-name { font-size: 0.9rem; font-weight: 700; }
+        
+        #game-screen {
+            padding: 1rem;
+            position: relative;
+        }
+        .game-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; transition: all 0.5s ease;
+        }
+        
+        .bg-office {
+            background: linear-gradient(135deg, #f5f0e8 0%, #e8dcc8 30%, #d4c4a8 60%, #c4a882 100%);
+        }
+        .bg-office::before {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(139,90,43,0.03) 40px, rgba(139,90,43,0.03) 41px),
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(139,90,43,0.03) 40px, rgba(139,90,43,0.03) 41px);
+        }
+        .bg-studio {
+            background: linear-gradient(135deg, #1a1a2e 0%, #2c2c54 50%, #1a1a2e 100%);
+        }
+        .bg-studio::before {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 20% 20%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 80%, rgba(255,255,255,0.03) 0%, transparent 50%);
+        }
+        .bg-theater {
+            background: linear-gradient(135deg, #2c0000 0%, #4a0000 30%, #6b0000 60%, #3d0000 100%);
+        }
+        .bg-theater::before {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%);
+        }
+        .bg-field {
+            background: linear-gradient(135deg, #2d5a27 0%, #3d7a35 25%, #4a8b3c 50%, #3d7a35 75%, #2d5a27 100%);
+        }
+        .bg-field::before {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(255,255,255,0.08) 30px, rgba(255,255,255,0.08) 31px);
+        }
+        .bg-gym {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #1e3a5f 100%);
+        }
+        .bg-gym::before {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, rgba(220,20,60,0.1) 0%, transparent 30%, transparent 70%, rgba(0,0,139,0.1) 100%);
+        }
+        
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .score-player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .score-avatar { width: 50px; height: 50px; }
+        .score-name { font-size: 0.8rem; font-weight: 700; }
+        .score-wins {
+            font-size: 1.5rem; font-weight: 900;
+            color: var(--gold);
+        }
+        .score-vs {
+            font-size: 1.2rem; font-weight: 800;
+            color: rgba(255,255,255,0.4);
+        }
+        .score-active { box-shadow: 0 0 20px rgba(241,196,15,0.3); border-color: var(--gold); }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 400px;
+            margin: 0 auto 1.5rem;
+            padding: 12px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 2px solid var(--glass-border);
+            border-radius: 20px;
+            position: relative;
+        }
+        .cell {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .cell:hover { background: rgba(255,255,255,0.2); }
+        .cell svg { width: 70%; height: 70%; animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .cell.winner { background: rgba(46, 204, 113, 0.3); animation: winnerPulse 1s ease infinite; }
+        .cell.winner::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            animation: lineDraw 0.5s ease forwards;
+        }
+        
+        .game-status {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            min-height: 2rem;
+        }
+        .game-status .turn-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.5rem;
+            background: var(--glass);
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .game-btn {
+            padding: 0.7rem 1.5rem;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-restart { background: linear-gradient(45deg, #27ae60, #2ecc71); color: #fff; }
+        .btn-menu { background: var(--glass); color: #fff; border: 1px solid var(--glass-border); }
+        .btn-rules { background: linear-gradient(45deg, #9b59b6, #8e44ad); color: #fff; }
+        
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalIn 0.4s ease;
+        }
+        .modal-title {
+            font-size: 1.5rem; font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .modal-content { line-height: 1.8; color: rgba(255,255,255,0.8); }
+        .modal-close {
+            margin-top: 1.5rem;
+            width: 100%;
+            padding: 0.8rem;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--accent), #c0392b);
+            color: #fff;
+            cursor: pointer;
+        }
+        
+        .win-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .win-overlay.active { display: flex; }
+        .win-avatar { width: 120px; height: 120px; animation: bounce 1s ease infinite; }
+        .win-text { font-size: 2rem; font-weight: 900; color: var(--gold); }
+        .win-sub { font-size: 1.2rem; color: rgba(255,255,255,0.7); }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+            70% { transform: scale(1.2) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        @keyframes winnerPulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(46,204,113,0.3); }
+            50% { box-shadow: 0 0 30px rgba(46,204,113,0.6); }
+        }
+        @keyframes lineDraw {
+            from { width: 0; left: 50%; }
+            to { width: 100%; left: 0; }
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.8) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .map-decor {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.15;
+        }
+        
+        @media (max-width: 480px) {
+            .chars-grid { grid-template-columns: repeat(3, 1fr); }
+            .board { gap: 5px; padding: 8px; }
+            .cell svg { width: 60%; height: 60%; }
+            .score-avatar { width: 40px; height: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="intro-screen" class="screen active">
+    <div class="intro-content">
+        <h1 class="intro-title">السراج اكس او</h1>
+        <p class="intro-subtitle">تحدي الأصدقاء في لعبة XO المميزة</p>
+        <button class="btn-start" onclick="showScreen('map-screen')">ابدأ اللعب</button>
+    </div>
+</div>
+
+<div id="map-screen" class="screen">
+    <div class="screen-header">
+        <h2 class="screen-title">اختر الخريطة</h2>
+        <p class="screen-desc">اختر البيئة التي تريد اللعب فيها</p>
+    </div>
+    <div class="maps-grid" id="maps-grid"></div>
+    <button class="btn-continue" id="btn-map-continue" onclick="showScreen('char-screen')" disabled>متابعة</button>
+</div>
+
+<div id="char-screen" class="screen">
+    <div class="screen-header">
+        <h2 class="screen-title">اختر الشخصيات</h2>
+        <p class="screen-desc" id="char-step-text">اختر اللاعب الأول</p>
+    </div>
+    <div class="chars-grid" id="chars-grid"></div>
+    <button class="btn-continue" id="btn-char-continue" onclick="nextCharStep()" disabled>متابعة</button>
+</div>
+
+<div id="game-screen" class="screen">
+    <div class="game-bg" id="game-bg"></div>
+    <div class="game-container">
+        <div class="scoreboard" id="scoreboard">
+            <div class="score-player" id="score-p1">
+                <div class="score-avatar" id="score-avatar-p1"></div>
+                <div class="score-name" id="score-name-p1">اللاعب 1</div>
+                <div class="score-wins" id="score-wins-p1">0</div>
+            </div>
+            <div class="score-vs">VS</div>
+            <div class="score-player" id="score-p2">
+                <div class="score-avatar" id="score-avatar-p2"></div>
+                <div class="score-name" id="score-name-p2">اللاعب 2</div>
+                <div class="score-wins" id="score-wins-p2">0</div>
+            </div>
+        </div>
+        
+        <div class="game-status" id="game-status">
+            <div class="turn-indicator">
+                <span id="turn-text">دور اللاعب الأول</span>
+            </div>
+        </div>
+        
+        <div class="board" id="board"></div>
+        
+        <div class="game-controls">
+            <button class="game-btn btn-restart" onclick="restartGame()">إعادة اللعب</button>
+            <button class="game-btn btn-menu" onclick="backToMenu()">القائمة</button>
+            <button class="game-btn btn-rules" onclick="openRules()">قوانين اللعبة</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="rules-modal">
+    <div class="modal">
+        <h3 class="modal-title">قوانين اللعبة</h3>
+        <div class="modal-content">
+            <p>1. اللعبة تُلعب بين لاعبين على شبكة 3×3.</p>
+            <p>2. كل لاعب يختار شخصية مميزة.</p>
+            <p>3. الهدف هو تكوين خط أفقي أو رأسي أو قطري من 3 خلايا متتالية.</p>
+            <p>4. اللاعب الذي يكمل الخط أولاً يفوز بالجولة.</p>
+            <p>5. إذا امتلأت الشبكة دون فائز، تكون النتيجة تعادل.</p>
+            <p>6. يتم تسجيل الانتصارات في لوحة النتائج.</p>
+        </div>
+        <button class="modal-close" onclick="closeRules()">فهمت</button>
+    </div>
+</div>
+
+<div class="win-overlay" id="win-overlay">
+    <div class="win-avatar" id="win-avatar"></div>
+    <div class="win-text" id="win-text">فاز اللاعب!</div>
+    <div class="win-sub" id="win-sub">أحسنت!</div>
+    <button class="btn-start" onclick="closeWinOverlay()">الجولة التالية</button>
+</div>
+
+<script>
+with open('/mnt/agents/output/al-siraj-xo.html', 'a', encoding='utf-8') as f:
+    f.write('''
+var maps = [
+    { id: 'office', name: 'الإدارة', desc: 'بيئة رسمية بأجواء الخشب الطبيعي', class: 'bg-office' },
+    { id: 'studio', name: 'الاستديو', desc: 'بيئة فنية مع إضاءات احترافية', class: 'bg-studio' },
+    { id: 'theater', name: 'غرفة المسرح', desc: 'أجواء مسرحية درامية', class: 'bg-theater' },
+    { id: 'field', name: 'الملعب', desc: 'عشب أخضر وأجواء رياضية', class: 'bg-field' },
+    { id: 'gym', name: 'الصالة الرياضية', desc: 'صالة فنون قتالية', class: 'bg-gym' }
+];
+
+var characters = [
+    { id: 'mahmoud', name: 'محمود' },
+    { id: 'binyacoub', name: 'بن يعقوب' },
+    { id: 'karar', name: 'كرار' },
+    { id: 'fares', name: 'فارس' },
+    { id: 'abuomra', name: 'أبو عمره' },
+    { id: 'dhia', name: 'ضياء' },
+    { id: 'alabbadi', name: 'العبادي' },
+    { id: 'hussein', name: 'حسين حمد' },
+    { id: 'ali', name: 'علي حمد' },
+    { id: 'fakhri', name: 'فخري' },
+    { id: 'eisa', name: 'عيسى' }
+];
+
+function getAvatarSVG(charId, size) {
+    var s = size || 80;
+    var cx = s/2, cy = s/2;
+    var r = s * 0.38;
+    
+    var avatars = {
+        mahmoud: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c68642"/><stop offset="100%" stop-color="#a0522d"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#mSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.15) + '" rx="' + (r*0.85) + '" ry="' + (r*0.75) + '" fill="#8b5a2b"/><circle cx="' + (cx-r*0.25) + '" cy="' + (cy-r*0.1) + '" r="' + (r*0.12) + '" fill="#fff"/><circle cx="' + (cx-r*0.25) + '" cy="' + (cy-r*0.1) + '" r="' + (r*0.06) + '" fill="#333"/><circle cx="' + (cx+r*0.25) + '" cy="' + (cy-r*0.1) + '" r="' + (r*0.12) + '" fill="#fff"/><circle cx="' + (cx+r*0.25) + '" cy="' + (cy-r*0.1) + '" r="' + (r*0.06) + '" fill="#333"/><rect x="' + (cx-r*0.5) + '" y="' + (cy-r*0.35) + '" width="' + r + '" height="' + (r*0.15) + '" rx="3" fill="#333" opacity="0.8"/><path d="M' + (cx-r*0.15) + ' ' + (cy+r*0.2) + ' Q' + cx + ' ' + (cy+r*0.35) + ' ' + (cx+r*0.15) + ' ' + (cy+r*0.2) + '" stroke="#5c3a1e" stroke-width="2" fill="none"/><path d="M' + (cx-r*0.3) + ' ' + (cy+r*0.45) + ' Q' + cx + ' ' + (cy+r*0.6) + ' ' + (cx+r*0.3) + ' ' + (cy+r*0.45) + '" stroke="#c68642" stroke-width="3" fill="none"/></svg>',
+        
+        binyacoub: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f5d0b0"/><stop offset="100%" stop-color="#e0b090"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#bSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.2) + '" rx="' + (r*0.9) + '" ry="' + (r*0.7) + '" fill="#5a3a1a"/><circle cx="' + (cx-r*0.25) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.11) + '" fill="#fff"/><circle cx="' + (cx-r*0.25) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.055) + '" fill="#2c5282"/><circle cx="' + (cx+r*0.25) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.11) + '" fill="#fff"/><circle cx="' + (cx+r*0.25) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.055) + '" fill="#2c5282"/><rect x="' + (cx-r*0.55) + '" y="' + (cy-r*0.3) + '" width="' + (r*1.1) + '" height="' + (r*0.18) + '" rx="4" fill="#1a365d" opacity="0.85"/><path d="M' + (cx-r*0.2) + ' ' + (cy+r*0.25) + ' Q' + cx + ' ' + (cy+r*0.4) + ' ' + (cx+r*0.2) + ' ' + (cy+r*0.25) + '" stroke="#8b6914" stroke-width="2.5" fill="none"/><ellipse cx="' + cx + '" cy="' + (cy+r*0.55) + '" rx="' + (r*0.5) + '" ry="' + (r*0.15) + '" fill="#e0b090" opacity="0.6"/></svg>',
+        
+        karar: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="kSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d4a574"/><stop offset="100%" stop-color="#b8956a"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#kSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.25) + '" rx="' + (r*0.8) + '" ry="' + (r*0.65) + '" fill="#2d2d2d"/><circle cx="' + (cx-r*0.22) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx-r*0.22) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><circle cx="' + (cx+r*0.22) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx+r*0.22) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><path d="M' + (cx-r*0.35) + ' ' + (cy+r*0.1) + ' Q' + (cx-r*0.2) + ' ' + (cy+r*0.25) + ' ' + (cx-r*0.05) + ' ' + (cy+r*0.15) + '" stroke="#4a3728" stroke-width="1.5" fill="none"/><path d="M' + (cx+r*0.35) + ' ' + (cy+r*0.1) + ' Q' + (cx+r*0.2) + ' ' + (cy+r*0.25) + ' ' + (cx+r*0.05) + ' ' + (cy+r*0.15) + '" stroke="#4a3728" stroke-width="1.5" fill="none"/><path d="M' + (cx-r*0.15) + ' ' + (cy+r*0.3) + ' Q' + cx + ' ' + (cy+r*0.45) + ' ' + (cx+r*0.15) + ' ' + (cy+r*0.3) + '" stroke="#8b5a2b" stroke-width="2" fill="none"/><rect x="' + (cx-r*0.4) + '" y="' + (cy+r*0.5) + '" width="' + (r*0.8) + '" height="' + (r*0.12) + '" rx="2" fill="#e74c3c" opacity="0.3"/></svg>',
+        
+        fares: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="fSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8c4a0"/><stop offset="100%" stop-color="#d4a574"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#fSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.15) + '" rx="' + (r*0.88) + '" ry="' + (r*0.72) + '" fill="#3d2b1f"/><circle cx="' + (cx-r*0.23) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.11) + '" fill="#fff"/><circle cx="' + (cx-r*0.23) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.055) + '" fill="#2d5a27"/><circle cx="' + (cx+r*0.23) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.11) + '" fill="#fff"/><circle cx="' + (cx+r*0.23) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.055) + '" fill="#2d5a27"/><path d="M' + (cx-r*0.18) + ' ' + (cy+r*0.22) + ' Q' + cx + ' ' + (cy+r*0.38) + ' ' + (cx+r*0.18) + ' ' + (cy+r*0.22) + '" stroke="#a0522d" stroke-width="2.5" fill="none"/><ellipse cx="' + cx + '" cy="' + (cy+r*0.55) + '" rx="' + (r*0.55) + '" ry="' + (r*0.18) + '" fill="#d4a574" opacity="0.5"/></svg>',
+        
+        abuomra: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="aSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b8956a"/><stop offset="100%" stop-color="#a07850"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#aSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.1) + '" rx="' + (r*0.85) + '" ry="' + (r*0.7) + '" fill="#4a3728"/><circle cx="' + (cx-r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx-r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><circle cx="' + (cx+r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx+r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><path d="M' + (cx-r*0.15) + ' ' + (cy+r*0.2) + ' Q' + cx + ' ' + (cy+r*0.35) + ' ' + (cx+r*0.15) + ' ' + (cy+r*0.2) + '" stroke="#5c3a1e" stroke-width="2" fill="none"/><circle cx="' + cx + '" cy="' + (cy+r*0.28) + '" r="' + (r*0.06) + '" fill="#a07850" opacity="0.6"/></svg>',
+        
+        dhia: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="dSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8c4a0"/><stop offset="100%" stop-color="#d4a574"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#dSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.2) + '" rx="' + (r*0.82) + '" ry="' + (r*0.68) + '" fill="#2d2d2d"/><path d="M' + (cx-r*0.4) + ' ' + (cy-r*0.35) + ' Q' + (cx-r*0.3) + ' ' + (cy-r*0.5) + ' ' + (cx-r*0.15) + ' ' + (cy-r*0.4) + ' Q' + cx + ' ' + (cy-r*0.55) + ' ' + (cx+r*0.15) + ' ' + (cy-r*0.4) + ' Q' + (cx+r*0.3) + ' ' + (cy-r*0.5) + ' ' + (cx+r*0.4) + ' ' + (cy-r*0.35) + '" stroke="#2d2d2d" stroke-width="3" fill="none"/><circle cx="' + (cx-r*0.2) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx-r*0.2) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><circle cx="' + (cx+r*0.2) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx+r*0.2) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><path d="M' + (cx-r*0.12) + ' ' + (cy+r*0.22) + ' Q' + cx + ' ' + (cy+r*0.35) + ' ' + (cx+r*0.12) + ' ' + (cy+r*0.22) + '" stroke="#a0522d" stroke-width="2" fill="none"/><rect x="' + (cx-r*0.35) + '" y="' + (cy+r*0.5) + '" width="' + (r*0.7) + '" height="' + (r*0.1) + '" rx="2" fill="#3498db" opacity="0.3"/></svg>',
+        
+        alabbadi: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="abSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8c4a0"/><stop offset="100%" stop-color="#d4a574"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#abSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.15) + '" rx="' + (r*0.9) + '" ry="' + (r*0.75) + '" fill="#3d2b1f"/><circle cx="' + (cx-r*0.25) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.11) + '" fill="#fff"/><circle cx="' + (cx-r*0.25) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.055) + '" fill="#1a1a1a"/><circle cx="' + (cx+r*0.25) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.11) + '" fill="#fff"/><circle cx="' + (cx+r*0.25) + '" cy="' + (cy-r*0.05) + '" r="' + (r*0.055) + '" fill="#1a1a1a"/><rect x="' + (cx-r*0.5) + '" y="' + (cy-r*0.32) + '" width="' + r + '" height="' + (r*0.16) + '" rx="3" fill="#2c3e50" opacity="0.8"/><path d="M' + (cx-r*0.3) + ' ' + (cy+r*0.15) + ' Q' + (cx-r*0.15) + ' ' + (cy+r*0.25) + ' ' + cx + ' ' + (cy+r*0.15) + ' Q' + (cx+r*0.15) + ' ' + (cy+r*0.25) + ' ' + (cx+r*0.3) + ' ' + (cy+r*0.15) + '" stroke="#4a3728" stroke-width="2" fill="none"/><path d="M' + (cx-r*0.15) + ' ' + (cy+r*0.3) + ' Q' + cx + ' ' + (cy+r*0.42) + ' ' + (cx+r*0.15) + ' ' + (cy+r*0.3) + '" stroke="#5c3a1e" stroke-width="2" fill="none"/><ellipse cx="' + cx + '" cy="' + (cy+r*0.55) + '" rx="' + (r*0.6) + '" ry="' + (r*0.2) + '" fill="#d4a574" opacity="0.5"/></svg>',
+        
+        hussein: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="hSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c68642"/><stop offset="100%" stop-color="#a0522d"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#hSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.05) + '" rx="' + (r*0.85) + '" ry="' + (r*0.7) + '" fill="#c68642"/><circle cx="' + (cx-r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx-r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><circle cx="' + (cx+r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx+r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><path d="M' + (cx-r*0.2) + ' ' + (cy+r*0.15) + ' Q' + cx + ' ' + (cy+r*0.22) + ' ' + (cx+r*0.2) + ' ' + (cy+r*0.15) + '" stroke="#4a3728" stroke-width="2.5" fill="none"/><path d="M' + (cx-r*0.15) + ' ' + (cy+r*0.3) + ' Q' + cx + ' ' + (cy+r*0.4) + ' ' + (cx+r*0.15) + ' ' + (cy+r*0.3) + '" stroke="#a0522d" stroke-width="2" fill="none"/><rect x="' + (cx-r*0.4) + '" y="' + (cy+r*0.5) + '" width="' + (r*0.8) + '" height="' + (r*0.12) + '" rx="2" fill="#e74c3c" opacity="0.4"/></svg>',
+        
+        ali: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="alSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d4a574"/><stop offset="100%" stop-color="#b8956a"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#alSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.1) + '" rx="' + (r*0.8) + '" ry="' + (r*0.65) + '" fill="#5a4a3a"/><circle cx="' + (cx-r*0.2) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx-r*0.2) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#2c5282"/><circle cx="' + (cx+r*0.2) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx+r*0.2) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#2c5282"/><path d="M' + (cx-r*0.15) + ' ' + (cy+r*0.2) + ' Q' + cx + ' ' + (cy+r*0.32) + ' ' + (cx+r*0.15) + ' ' + (cy+r*0.2) + '" stroke="#8b5a2b" stroke-width="2" fill="none"/><rect x="' + (cx-r*0.3) + '" y="' + (cy+r*0.5) + '" width="' + (r*0.6) + '" height="' + (r*0.1) + '" rx="2" fill="#3498db" opacity="0.3"/></svg>',
+        
+        fakhri: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="fkSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#c68642"/><stop offset="100%" stop-color="#a0522d"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#fkSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.15) + '" rx="' + (r*0.82) + '" ry="' + (r*0.68) + '" fill="#6b5a4a"/><path d="M' + (cx-r*0.35) + ' ' + (cy-r*0.35) + ' L' + (cx-r*0.25) + ' ' + (cy-r*0.2) + ' L' + (cx-r*0.15) + ' ' + (cy-r*0.3) + ' L' + cx + ' ' + (cy-r*0.15) + ' L' + (cx+r*0.15) + ' ' + (cy-r*0.3) + ' L' + (cx+r*0.25) + ' ' + (cy-r*0.2) + ' L' + (cx+r*0.35) + ' ' + (cy-r*0.35) + '" stroke="#8b7355" stroke-width="2" fill="none"/><circle cx="' + (cx-r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx-r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><circle cx="' + (cx+r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx+r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><path d="M' + (cx-r*0.25) + ' ' + (cy+r*0.12) + ' Q' + (cx-r*0.1) + ' ' + (cy+r*0.22) + ' ' + cx + ' ' + (cy+r*0.12) + ' Q' + (cx+r*0.1) + ' ' + (cy+r*0.22) + ' ' + (cx+r*0.25) + ' ' + (cy+r*0.12) + '" stroke="#4a3728" stroke-width="2" fill="none"/><path d="M' + (cx-r*0.12) + ' ' + (cy+r*0.28) + ' Q' + cx + ' ' + (cy+r*0.38) + ' ' + (cx+r*0.12) + ' ' + (cy+r*0.28) + '" stroke="#5c3a1e" stroke-width="2" fill="none"/></svg>',
+        
+        eisa: '<svg viewBox="0 0 ' + s + ' ' + s + '" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="eSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8c4a0"/><stop offset="100%" stop-color="#d4a574"/></linearGradient></defs><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#eSkin)"/><ellipse cx="' + cx + '" cy="' + (cy-r*0.05) + '" rx="' + (r*0.85) + '" ry="' + (r*0.7) + '" fill="#c68642"/><rect x="' + (cx-r*0.5) + '" y="' + (cy-r*0.25) + '" width="' + r + '" height="' + (r*0.15) + '" rx="3" fill="#2c3e50" opacity="0.8"/><circle cx="' + (cx-r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx-r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><circle cx="' + (cx+r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.1) + '" fill="#fff"/><circle cx="' + (cx+r*0.22) + '" cy="' + (cy-r*0.02) + '" r="' + (r*0.05) + '" fill="#1a1a1a"/><path d="M' + (cx-r*0.3) + ' ' + (cy+r*0.15) + ' Q' + (cx-r*0.15) + ' ' + (cy+r*0.25) + ' ' + cx + ' ' + (cy+r*0.15) + ' Q' + (cx+r*0.15) + ' ' + (cy+r*0.25) + ' ' + (cx+r*0.3) + ' ' + (cy+r*0.15) + '" stroke="#4a3728" stroke-width="2.5" fill="none"/><path d="M' + (cx-r*0.15) + ' ' + (cy+r*0.35) + ' Q' + cx + ' ' + (cy+r*0.45) + ' ' + (cx+r*0.15) + ' ' + (cy+r*0.35) + '" stroke="#5c3a1e" stroke-width="2" fill="none"/><rect x="' + (cx-r*0.25) + '" y="' + (cy+r*0.55) + '" width="' + (r*0.5) + '" height="' + (r*0.08) + '" rx="2" fill="#e74c3c" opacity="0.3"/></svg>'
+    };
+    return avatars[charId] || avatars['mahmoud'];
+}
+
+function getMapDecor(mapId) {
+    var decors = {
+        office: '<svg class="map-decor" style="top:5%;left:5%;width:80px;height:80px;" viewBox="0 0 80 80"><rect x="10" y="20" width="25" height="35" rx="2" fill="#8b6914" opacity="0.3"/><rect x="12" y="22" width="21" height="31" rx="1" fill="#f5f0e8" opacity="0.5"/><line x1="18" y1="28" x2="28" y2="28" stroke="#8b6914" stroke-width="1" opacity="0.4"/><line x1="18" y1="33" x2="28" y2="33" stroke="#8b6914" stroke-width="1" opacity="0.4"/><line x1="18" y1="38" x2="28" y2="38" stroke="#8b6914" stroke-width="1" opacity="0.4"/><rect x="45" y="15" width="3" height="50" rx="1" fill="#5c4033" opacity="0.3"/><polygon points="43,15 50,15 46.5,8" fill="#e74c3c" opacity="0.3"/></svg><svg class="map-decor" style="bottom:10%;right:8%;width:60px;height:60px;" viewBox="0 0 60 60"><rect x="5" y="10" width="50" height="8" rx="2" fill="#2c3e50" opacity="0.2"/><rect x="8" y="22" width="44" height="6" rx="2" fill="#2c3e50" opacity="0.15"/><rect x="12" y="32" width="36" height="6" rx="2" fill="#2c3e50" opacity="0.1"/></svg>',
+        
+        studio: '<svg class="map-decor" style="top:8%;left:5%;width:100px;height:100px;" viewBox="0 0 100 100"><rect x="20" y="20" width="60" height="50" rx="5" fill="#fff" opacity="0.08"/><rect x="25" y="25" width="50" height="40" rx="3" fill="#fff" opacity="0.05"/><line x1="50" y1="20" x2="50" y2="5" stroke="#fff" stroke-width="2" opacity="0.1"/><polygon points="35,5 65,5 60,15 40,15" fill="#fff" opacity="0.08"/></svg><svg class="map-decor" style="bottom:5%;right:5%;width:80px;height:80px;" viewBox="0 0 80 80"><circle cx="40" cy="35" r="20" fill="none" stroke="#fff" stroke-width="2" opacity="0.08"/><circle cx="40" cy="35" r="12" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.06"/><circle cx="40" cy="35" r="5" fill="#fff" opacity="0.05"/><rect x="38" y="55" width="4" height="20" fill="#fff" opacity="0.06"/></svg>',
+        
+        theater: '<svg class="map-decor" style="top:0;left:0;width:120px;height:100%;" viewBox="0 0 120 600" preserveAspectRatio="none"><path d="M0,0 Q60,100 0,200 Q60,300 0,400 Q60,500 0,600 L0,0Z" fill="#8b0000" opacity="0.3"/></svg><svg class="map-decor" style="top:0;right:0;width:120px;height:100%;" viewBox="0 0 120 600" preserveAspectRatio="none"><path d="M120,0 Q60,100 120,200 Q60,300 120,400 Q60,500 120,600 L120,0Z" fill="#8b0000" opacity="0.3"/></svg><svg class="map-decor" style="top:15%;left:50%;transform:translateX(-50%);width:200px;height:40px;" viewBox="0 0 200 40"><rect x="10" y="10" width="180" height="20" rx="3" fill="#fff" opacity="0.05"/><text x="100" y="24" text-anchor="middle" fill="#fff" opacity="0.08" font-size="12" font-family="Tajawal">بدل ضايع</text></svg><svg class="map-decor" style="top:25%;left:50%;transform:translateX(-50%);width:200px;height:40px;" viewBox="0 0 200 40"><rect x="10" y="10" width="180" height="20" rx="3" fill="#fff" opacity="0.05"/><text x="100" y="24" text-anchor="middle" fill="#fff" opacity="0.08" font-size="12" font-family="Tajawal">شبيه الإمام</text></svg><svg class="map-decor" style="top:35%;left:50%;transform:translateX(-50%);width:220px;height:40px;" viewBox="0 0 220 40"><rect x="10" y="10" width="200" height="20" rx="3" fill="#fff" opacity="0.05"/><text x="110" y="24" text-anchor="middle" fill="#fff" opacity="0.08" font-size="11" font-family="Tajawal">وقت من ذاك الزمان</text></svg>',
+        
+        field: '<svg class="map-decor" style="top:0;left:0;width:100%;height:100%;" viewBox="0 0 800 600" preserveAspectRatio="none"><rect x="350" y="50" width="100" height="500" fill="none" stroke="#fff" stroke-width="2" opacity="0.15"/><circle cx="400" cy="300" r="60" fill="none" stroke="#fff" stroke-width="2" opacity="0.15"/><line x1="0" y1="300" x2="800" y2="300" stroke="#fff" stroke-width="2" opacity="0.15"/><rect x="50" y="200" width="60" height="200" fill="none" stroke="#fff" stroke-width="2" opacity="0.1"/><rect x="690" y="200" width="60" height="200" fill="none" stroke="#fff" stroke-width="2" opacity="0.1"/></svg>',
+        
+        gym: '<svg class="map-decor" style="top:0;left:0;width:100%;height:100%;" viewBox="0 0 800 600" preserveAspectRatio="none"><rect x="0" y="0" width="50%" height="100%" fill="#1e3a5f" opacity="0.2"/><rect x="50%" y="0" width="50%" height="100%" fill="#8b0000" opacity="0.15"/><line x1="50%" y1="0" x2="50%" y2="100%" stroke="#fff" stroke-width="3" opacity="0.2"/></svg><svg class="map-decor" style="top:5%;right:10%;width:60px;height:80px;" viewBox="0 0 60 80"><rect x="20" y="10" width="20" height="50" rx="2" fill="#c0392b" opacity="0.3"/><rect x="15" y="55" width="30" height="8" rx="2" fill="#c0392b" opacity="0.4"/><rect x="22" y="62" width="16" height="15" rx="2" fill="#c0392b" opacity="0.3"/></svg>'
+    };
+    return decors[mapId] || '';
+}
+
+var selectedMap = null;
+var player1Char = null;
+var player2Char = null;
+var charStep = 1;
+var board = Array(9).fill(null);
+var currentPlayer = 1;
+var gameActive = true;
+var wins = { p1: 0, p2: 0 };
+
+var winPatterns = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+];
+
+function init() {
+    renderMaps();
+    renderChars();
+    renderBoard();
+}
+
+function renderMaps() {
+    var grid = document.getElementById('maps-grid');
+    var html = '';
+    for (var i = 0; i < maps.length; i++) {
+        var m = maps[i];
+        var selClass = selectedMap === m.id ? 'selected' : '';
+        html += '<div class="map-card ' + selClass + '" onclick="selectMap(\'' + m.id + '\')">' +
+                '<div class="map-preview preview-' + m.id + '"></div>' +
+                '<div class="map-name">' + m.name + '</div>' +
+                '<div class="map-desc">' + m.desc + '</div>' +
+                '</div>';
+    }
+    grid.innerHTML = html;
+}
+
+function renderChars() {
+    var grid = document.getElementById('chars-grid');
+    var html = '';
+    for (var i = 0; i < characters.length; i++) {
+        var c = characters[i];
+        var disabled = (charStep === 2 && player1Char === c.id) ? 'disabled' : '';
+        var selected = ((charStep === 1 && player1Char === c.id) || (charStep === 2 && player2Char === c.id)) ? 'selected' : '';
+        html += '<div class="char-card ' + selected + ' ' + disabled + '" onclick="selectChar(\'' + c.id + '\')">' +
+                '<div class="char-avatar">' + getAvatarSVG(c.id, 80) + '</div>' +
+                '<div class="char-name">' + c.name + '</div>' +
+                '</div>';
+    }
+    grid.innerHTML = html;
+}
+
+function renderBoard() {
+    var boardEl = document.getElementById('board');
+    var html = '';
+    for (var i = 0; i < 9; i++) {
+        var cell = board[i];
+        html += '<div class="cell ' + (cell ? 'filled' : '') + '" data-index="' + i + '" onclick="makeMove(' + i + ')">' +
+                (cell ? getAvatarSVG(cell, 100) : '') +
+                '</div>';
+    }
+    boardEl.innerHTML = html;
+}
+
+function showScreen(screenId) {
+    var screens = document.querySelectorAll('.screen');
+    for (var i = 0; i < screens.length; i++) {
+        screens[i].classList.remove('active');
+    }
+    document.getElementById(screenId).classList.add('active');
+    
+    if (screenId === 'game-screen') {
+        setupGameScreen();
+    }
+}
+
+function selectMap(mapId) {
+    selectedMap = mapId;
+    renderMaps();
+    document.getElementById('btn-map-continue').disabled = false;
+}
+
+function selectChar(charId) {
+    if (charStep === 1) {
+        player1Char = charId;
+        renderChars();
+        document.getElementById('btn-char-continue').disabled = false;
+    } else {
+        if (charId === player1Char) return;
+        player2Char = charId;
+        renderChars();
+        document.getElementById('btn-char-continue').disabled = false;
+    }
+}
+
+function nextCharStep() {
+    if (charStep === 1 && player1Char) {
+        charStep = 2;
+        document.getElementById('char-step-text').textContent = 'اختر اللاعب الثاني';
+        document.getElementById('btn-char-continue').disabled = true;
+        renderChars();
+    } else if (charStep === 2 && player2Char) {
+        showScreen('game-screen');
+    }
+}
+
+function setupGameScreen() {
+    var bg = document.getElementById('game-bg');
+    var mapClass = 'bg-office';
+    for (var i = 0; i < maps.length; i++) {
+        if (maps[i].id === selectedMap) {
+            mapClass = maps[i].class;
+            break;
+        }
+    }
+    bg.className = 'game-bg ' + mapClass;
+    bg.innerHTML = getMapDecor(selectedMap);
+    
+    document.getElementById('score-avatar-p1').innerHTML = getAvatarSVG(player1Char, 50);
+    document.getElementById('score-name-p1').textContent = characters.find(function(c) { return c.id === player1Char; }).name;
+    document.getElementById('score-wins-p1').textContent = wins.p1;
+    
+    document.getElementById('score-avatar-p2').innerHTML = getAvatarSVG(player2Char, 50);
+    document.getElementById('score-name-p2').textContent = characters.find(function(c) { return c.id === player2Char; }).name;
+    document.getElementById('score-wins-p2').textContent = wins.p2;
+    
+    updateTurnIndicator();
+}
+
+function updateTurnIndicator() {
+    var p1El = document.getElementById('score-p1');
+    var p2El = document.getElementById('score-p2');
+    var turnText = document.getElementById('turn-text');
+    
+    if (currentPlayer === 1) {
+        p1El.classList.add('score-active');
+        p2El.classList.remove('score-active');
+        turnText.textContent = 'دور ' + characters.find(function(c) { return c.id === player1Char; }).name;
+    } else {
+        p1El.classList.remove('score-active');
+        p2El.classList.add('score-active');
+        turnText.textContent = 'دور ' + characters.find(function(c) { return c.id === player2Char; }).name;
+    }
+}
+
+function makeMove(index) {
+    if (!gameActive || board[index] !== null) return;
+    
+    board[index] = currentPlayer === 1 ? player1Char : player2Char;
+    renderBoard();
+    
+    var winner = checkWinner();
+    if (winner) {
+        gameActive = false;
+        highlightWinners(winner);
+        if (currentPlayer === 1) {
+            wins.p1++;
+        } else {
+            wins.p2++;
+        }
+        document.getElementById('score-wins-p1').textContent = wins.p1;
+        document.getElementById('score-wins-p2').textContent = wins.p2;
+        
+        var winnerName = currentPlayer === 1 ? characters.find(function(c) { return c.id === player1Char; }).name : characters.find(function(c) { return c.id === player2Char; }).name;
+        var winnerChar = currentPlayer === 1 ? player1Char : player2Char;
+        
+        setTimeout(function() {
+            showWinOverlay(winnerName, winnerChar);
+        }, 800);
+    } else if (board.every(function(c) { return c !== null; })) {
+        gameActive = false;
+        document.getElementById('turn-text').textContent = 'تعادل!';
+        setTimeout(function() {
+            showWinOverlay('تعادل!', null);
+        }, 500);
+    } else {
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+        updateTurnIndicator();
+    }
+}
+
+function checkWinner() {
+    for (var i = 0; i < winPatterns.length; i++) {
+        var pattern = winPatterns[i];
+        var a = board[pattern[0]];
+        var b = board[pattern[1]];
+        var c = board[pattern[2]];
+        if (a && a === b && b === c) {
+            return pattern;
+        }
+    }
+    return null;
+}
+
+function highlightWinners(pattern) {
+    var cells = document.querySelectorAll('.cell');
+    for (var i = 0; i < pattern.length; i++) {
+        cells[pattern[i]].classList.add('winner');
+    }
+}
+
+function showWinOverlay(name, charId) {
+    var overlay = document.getElementById('win-overlay');
+    var avatarEl = document.getElementById('win-avatar');
+    var textEl = document.getElementById('win-text');
+    var subEl = document.getElementById('win-sub');
+    
+    if (charId) {
+        avatarEl.innerHTML = getAvatarSVG(charId, 120);
+        textEl.textContent = 'فاز ' + name + '!';
+        subEl.textContent = 'أحسنت!';
+    } else {
+        avatarEl.innerHTML = '';
+        textEl.textContent = name;
+        subEl.textContent = 'حظ أوفر في المرة القادمة';
+    }
+    
+    overlay.classList.add('active');
+}
+
+function closeWinOverlay() {
+    document.getElementById('win-overlay').classList.remove('active');
+    restartGame();
+}
+
+function restartGame() {
+    board = Array(9).fill(null);
+    currentPlayer = 1;
+    gameActive = true;
+    renderBoard();
+    updateTurnIndicator();
+}
+
+function backToMenu() {
+    selectedMap = null;
+    player1Char = null;
+    player2Char = null;
+    charStep = 1;
+    board = Array(9).fill(null);
+    currentPlayer = 1;
+    gameActive = true;
+    wins = { p1: 0, p2: 0 };
+    document.getElementById('char-step-text').textContent = 'اختر اللاعب الأول';
+    document.getElementById('btn-char-continue').disabled = true;
+    document.getElementById('btn-map-continue').disabled = true;
+    renderMaps();
+    renderChars();
+    renderBoard();
+    showScreen('intro-screen');
+}
+
+function openRules() {
+    document.getElementById('rules-modal').classList.add('active');
+}
+
+function closeRules() {
+    document.getElementById('rules-modal').classList.remove('active');
+}
+
+document.getElementById('rules-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeRules();
+});
+
+init();
+</script>
+</body>
+</html>
+''')
+
+print("File written successfully!")
+import os
+print("File size:", os.path.getsize('/mnt/agents/output/al-siraj-xo.html'), 
